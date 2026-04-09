@@ -1,0 +1,67 @@
+import json
+import datetime
+from datetime import timedelta
+
+# 模拟抓取昨日体育新闻 + 今日赛事
+def crawl_data():
+    yesterday = (datetime.date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+    today = datetime.date.today().strftime("%Y-%m-%d")
+
+    # 模拟数据（你可以后续替换成真实接口/爬虫）
+    news = [
+        {"date": yesterday, "title": "昨日体育热点新闻1", "content": "赛事精彩回顾..."},
+        {"date": yesterday, "title": "昨日体育热点新闻2", "content": "联赛最新战报..."},
+    ]
+
+    matches = [
+        {"time": today, "league": "足球联赛", "teams": "A队 vs B队", "stage": "常规赛"},
+        {"time": today, "league": "篮球联赛", "teams": "C队 vs D队", "stage": "季后赛"},
+    ]
+
+    return news, matches
+
+# 生成 index.html 网页
+def generate_html(news, matches):
+    html = f"""
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>每日体育素材库</title>
+    <style>
+        body{{font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6}}
+        .news{{margin: 1em 0; padding: 1em; border:1px solid #eee}}
+        .match{{background:#f8f9fa; padding:1em; margin:1em 0}}
+    </style>
+</head>
+<body>
+    <h1>每日体育素材库</h1>
+    <p>更新时间：{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+
+    <h2>昨日体育新闻</h2>
+    {''.join([f'<div class="news"><h3>{n["title"]}</h3><p>{n["content"]}</p></div>' for n in news])}
+
+    <h2>今日重点赛事</h2>
+    {''.join([f'<div class="match"><p>{m["time"]} | {m["league"]}</p><p><strong>{m["teams"]}</strong> {m["stage"]}</p></div>' for m in matches])}
+</body>
+</html>
+    """
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html)
+
+# 保存历史数据
+def save_history(news):
+    try:
+        with open("history.json", "r", encoding="utf-8") as f:
+            history = json.load(f)
+    except:
+        history = []
+    history.extend(news)
+    with open("history.json", "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
+
+if __name__ == "__main__":
+    news, matches = crawl_data()
+    generate_html(news, matches)
+    save_history(news)
+    print("更新完成：index.html 和 history.json")
